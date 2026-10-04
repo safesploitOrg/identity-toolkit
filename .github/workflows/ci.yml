@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pinned build/test dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Vendor dependency, verify SRI, syntax and unit tests
+        run: npm run check
+
+      - name: Confirm generated local XMLDSig deployment assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s public/assets/js/external/xmldsigjs-2.8.8.bundle.js
+          test -s public/assets/js/external/vendor-manifest.json
+
+  browser:
+    needs: validate
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned build/test dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Generate and verify local XMLDSig runtime
+        run: npm run vendor:xmldsig && npm run verify:vendor
+      - name: Install browser
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Run browser tests
+        run: npx playwright test --project=${{ matrix.browser }}

@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; worker-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'self'">
+  <title>Identity Toolkit</title>
+  <meta name="description" content="Browser-only identity, claims and federation diagnostics for JWT, OIDC/OAuth, SAML 2.0 and WS-Federation.">
+  <link rel="icon" type="image/svg+xml" href="./assets/images/favicon/identity.svg">
+  <link rel="stylesheet" href="./assets/css/app.css">
+  <script data-vendor="xmldsigjs" src="./assets/js/external/xmldsigjs-2.8.8.bundle.js" integrity="sha384-PLACEHOLDER" crossorigin="anonymous" defer></script>
+  <script type="module" src="./assets/js/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#inspect" aria-label="Identity Toolkit home">
+        <img class="brand-icon" src="./assets/images/favicon/identity.svg" width="38" height="38" alt="">
+        <span>
+          <strong>Identity Toolkit</strong>
+          <small>Tokens, claims &amp; federation diagnostics</small>
+        </span>
+      </a>
+      <nav class="primary-nav" aria-label="Primary navigation">
+        <a href="#inspect" data-route-link="inspect">Inspect</a>
+        <a href="#compare" data-route-link="compare">Compare Claims</a>
+        <a href="#federation" data-route-link="federation">Federation</a>
+        <a href="#security" data-route-link="security">Security</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="shell app-shell">
+    <section class="route" data-route="inspect">
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">Identity artefact analyser</p>
+          <h1>Inspect tokens and federation assertions locally</h1>
+          <p>Paste JWT/JWS, SAML 2.0, WS-Federation, OIDC discovery metadata, JWKS or SAML metadata. Analysis stays in this browser tab.</p>
+        </div>
+        <div class="privacy-badge"><span aria-hidden="true">🛡️</span><span><strong>Local only</strong><small>No token uploads or telemetry</small></span></div>
+      </div>
+
+      <div class="notice info"><strong>Validation model:</strong> decoded does not mean verified; verified does not mean trusted. Signature, time, issuer, audience, protocol semantics and key provenance are reported independently.</div>
+
+      <form id="inspect-form" novalidate>
+        <section class="panel input-panel">
+          <div class="panel-heading split-heading">
+            <div><p class="eyebrow">Input</p><h2>Token / assertion / metadata</h2></div>
+            <span id="detected-type" class="field-tag">Not analysed</span>
+          </div>
+          <label for="artifact-input">Identity artefact</label>
+          <textarea id="artifact-input" class="artifact-input" spellcheck="false" autocomplete="off" placeholder="Paste JWT, SAML Response, WS-Fed token response, OIDC metadata, JWKS or SAML metadata..."></textarea>
+
+          <div class="option-grid three-col">
+            <label>Validation profile
+              <select id="profile">
+                <option value="auto">Automatic</option>
+                <option value="generic-jwt">Generic JWT</option>
+                <option value="oidc-id-token">OIDC ID Token</option>
+                <option value="oauth-access-token">OAuth JWT Access Token</option>
+                <option value="openid-federation">OpenID Federation Entity Statement</option>
+              </select>
+            </label>
+            <label>Expected issuer <span class="muted">(optional)</span>
+              <input id="expected-issuer" class="text-input" type="text" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="https://idp.example/">
+            </label>
+            <label>Expected audience <span class="muted">(optional)</span>
+              <input id="expected-audience" class="text-input" type="text" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="client-id or resource URI">
+            </label>
+          </div>
+
+          <details class="advanced-block">
+            <summary>Protocol context, verification material &amp; time options</summary>
+            <div class="option-grid two-col details-content">
+              <label>JWK / JWKS <span class="muted">(JWT verification; optional)</span>
+                <textarea id="verification" class="small-textarea" spellcheck="false" placeholder='{"keys":[...]} or {"kty":"RSA",...}'></textarea>
+              </label>
+              <label>OAuth JWT profile
+                <select id="oauth-profile">
+                  <option value="auto">Automatic / provider-specific</option>
+                  <option value="rfc9068">RFC 9068 at+jwt</option>
+                </select>
+                <span class="field-help">RFC 9068 mode enforces the standard JWT access-token claim and typ requirements.</span>
+              </label>
+              <label>Expected OIDC nonce <span class="muted">(optional)</span>
+                <input id="expected-nonce" class="text-input" type="text" autocomplete="off" spellcheck="false" placeholder="nonce from authentication request">
+              </label>
+              <label>Maximum authentication age (seconds) <span class="muted">(optional)</span>
+                <input id="max-auth-age" class="text-input" type="number" min="0" placeholder="e.g. 3600">
+                <span class="field-help">Checks auth_time when you know the request-side max_age/policy.</span>
+              </label>
+              <label>Related access token <span class="muted">(optional; verifies at_hash)</span>
+                <textarea id="related-access-token" class="small-textarea compact-input" spellcheck="false" autocomplete="off" placeholder="Access token returned with this ID Token"></textarea>
+              </label>
+              <label>Related authorisation code <span class="muted">(optional; verifies c_hash)</span>
+                <textarea id="related-authorization-code" class="small-textarea compact-input" spellcheck="false" autocomplete="off" placeholder="Authorisation code returned with this ID Token"></textarea>
+              </label>
+              <label>Expected SAML recipient / Destination <span class="muted">(optional)</span>
+                <input id="expected-recipient" class="text-input" type="text" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="https://sp.example/saml/acs">
+              </label>
+              <label>Expected SAML InResponseTo <span class="muted">(optional)</span>
+                <input id="expected-in-response-to" class="text-input" type="text" autocomplete="off" spellcheck="false" placeholder="_request-id">
+              </label>
+              <label>Clock-skew allowance (seconds)
+                <input id="clock-skew" class="text-input" type="number" min="0" max="3600" value="300">
+                <span class="field-help">Used for JWT timestamps, OIDC auth_time and SAML/WS-Trust time windows. Default: 300 seconds.</span>
+              </label>
+            </div>
+          </details>
+        </section>
+
+        <div id="inspect-error" class="notice error hidden" role="alert"></div>
+        <div class="form-actions">
+          <button id="analyse-button" class="primary-button" type="submit">Analyse artefact</button>
+          <button id="clear-button" class="secondary-button" type="button">Clear</button>
+        </div>
+      </form>
+
+      <section id="results" class="results hidden" aria-live="polite">
+        <div class="section-heading split-heading">
+          <div><p class="eyebrow">Analysis</p><h2>Identity artefact results</h2></div>
+          <span id="overall-status" class="status-pill"></span>
+        </div>
+
+        <section class="panel">
+          <div class="panel-heading"><div><p class="eyebrow">Summary</p><h2>Protocol details</h2></div></div>
+          <div id="summary-grid" class="summary-grid"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading"><div><p class="eyebrow">Validation dimensions</p><h2>Findings</h2></div></div>
+          <div id="finding-list" class="finding-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading"><div><p class="eyebrow">Identity data</p><h2>Claims / attributes</h2></div></div>
+          <div id="claim-results" class="table-scroll"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading"><div><p class="eyebrow">Decoded material</p><h2>Raw / decoded views</h2></div></div>
+          <div id="raw-results" class="details-stack"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading split-heading">
+            <div><p class="eyebrow">Portable evidence</p><h2>Diagnostic report</h2><p>Raw bearer tokens and assertions are excluded by design.</p></div>
+            <div class="button-row">
+              <button id="copy-report" class="secondary-button" type="button">Copy report</button>
+              <button id="download-report" class="secondary-button" type="button">Download .txt</button>
+            </div>
+          </div>
+          <pre id="report-output" class="code-output"></pre>
+        </section>
+      </section>
+    </section>
+
+    <section class="route hidden" data-route="compare">
+      <div class="page-heading">
+        <div><p class="eyebrow">v0.4 · claims migration</p><h1>Compare claims across identity providers</h1><p>Compare JWT, SAML or WS-Fed claim sets. Common aliases are normalised so protocol migrations can be compared semantically.</p></div>
+      </div>
+      <form id="compare-form" novalidate>
+        <div class="results-columns">
+          <section class="panel"><label for="compare-left">Current / source IdP artefact</label><textarea id="compare-left" class="artifact-input medium" spellcheck="false" placeholder="Paste current JWT, SAML or WS-Fed artefact..."></textarea></section>
+          <section class="panel"><label for="compare-right">New / target IdP artefact</label><textarea id="compare-right" class="artifact-input medium" spellcheck="false" placeholder="Paste target JWT, SAML or WS-Fed artefact..."></textarea></section>
+        </div>
+        <section class="panel mapping-panel">
+          <div class="panel-heading"><div><p class="eyebrow">Claim mapping</p><h2>Optional migration aliases</h2><p>Map provider-specific/source claim names to the canonical claim name used by the target application.</p></div></div>
+          <label for="claim-mapping">JSON mapping <span class="muted">(optional)</span></label>
+          <textarea id="claim-mapping" class="small-textarea compact-input" spellcheck="false" placeholder='{"http://schemas.example/legacyRole":"roles","upn":"preferred_username"}'></textarea>
+        </section>
+        <div id="compare-error" class="notice error hidden" role="alert"></div>
+        <div class="form-actions"><button class="primary-button" type="submit">Compare claims</button></div>
+      </form>
+      <section id="compare-result" class="hidden">
+        <section class="panel">
+          <div class="panel-heading"><div><p class="eyebrow">Migration summary</p><h2>Claims compatibility</h2></div></div>
+          <div id="migration-summary" class="summary-grid"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-heading"><div><p class="eyebrow">Difference</p><h2>Normalised claim comparison</h2></div></div>
+          <div id="claim-diff-results" class="table-scroll"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-heading split-heading">
+            <div><p class="eyebrow">Portable migration evidence</p><h2>Claims migration report</h2><p>Highlights renamed/mapped claims and high-impact identity/authorisation differences.</p></div>
+            <div class="button-row"><button id="copy-migration-report" class="secondary-button" type="button">Copy report</button><button id="download-migration-report" class="secondary-button" type="button">Download .txt</button></div>
+          </div>
+          <pre id="migration-report-output" class="code-output"></pre>
+        </section>
+      </section>
+    </section>
+
+    <section class="route hidden" data-route="federation">
+      <div class="page-heading">
+        <div><p class="eyebrow">v0.6 · federation analysis</p><h1>Inspect and compare federation configuration</h1><p>Supports OIDC discovery documents, JWKS, SAML metadata and OpenID Federation entity statements. URLs are parsed but never contacted.</p></div>
+      </div>
+      <form id="federation-form" novalidate>
+        <div class="results-columns">
+          <section class="panel"><label for="federation-left">Configuration A</label><textarea id="federation-left" class="artifact-input medium" spellcheck="false" placeholder="OIDC discovery JSON, JWKS, SAML metadata, or OpenID Federation JWT..."></textarea></section>
+          <section class="panel"><label for="federation-right">Configuration B <span class="muted">(optional comparison)</span></label><textarea id="federation-right" class="artifact-input medium" spellcheck="false" placeholder="Optional second configuration..."></textarea></section>
+        </div>
+        <div id="federation-error" class="notice error hidden" role="alert"></div>
+        <div class="form-actions"><button class="primary-button" type="submit">Analyse federation configuration</button></div>
+      </form>
+
+      <section id="federation-result" class="hidden">
+        <div class="results-columns">
+          <section class="panel"><div class="panel-heading"><div><p class="eyebrow">Configuration A</p><h2>Summary &amp; findings</h2></div></div><div id="federation-left-summary" class="summary-grid single"></div><div id="federation-left-findings" class="finding-list"></div></section>
+          <section id="federation-right-result" class="panel hidden"><div class="panel-heading"><div><p class="eyebrow">Configuration B</p><h2>Summary &amp; findings</h2></div></div><div id="federation-right-summary" class="summary-grid single"></div><div id="federation-right-findings" class="finding-list"></div></section>
+        </div>
+        <section id="federation-diff-panel" class="panel hidden"><div class="panel-heading"><div><p class="eyebrow">Configuration drift</p><h2>Federation comparison</h2></div></div><div id="federation-diff" class="table-scroll"></div></section>
+        <section id="federation-migration-panel" class="panel hidden">
+          <div class="panel-heading split-heading">
+            <div><p class="eyebrow">Migration analysis</p><h2>Issuer &amp; signing-key transition</h2><p>Detects issuer/entity-identifier changes, JWKS key overlap/removal and SAML signing-certificate rotation.</p></div>
+            <div class="button-row"><button id="copy-federation-report" class="secondary-button" type="button">Copy report</button><button id="download-federation-report" class="secondary-button" type="button">Download .txt</button></div>
+          </div>
+          <div id="federation-migration-summary" class="summary-grid"></div>
+          <pre id="federation-report-output" class="code-output migration-output"></pre>
+        </section>
+      </section>
+    </section>
+
+    <section class="route hidden" data-route="security">
+      <div class="page-heading"><div><p class="eyebrow">Architecture &amp; privacy</p><h1>Security boundaries</h1><p>Identity artefacts often contain personal information and live bearer credentials. The public application is deliberately static and local-first.</p></div></div>
+      <div class="results-columns">
+        <section class="panel security-panel"><h2>Runtime boundary</h2><ul class="feature-list"><li>No backend, analytics or telemetry.</li><li><code>connect-src 'none'</code>; no fetch/XHR/WebSocket/EventSource path.</li><li>No token/claim persistence to localStorage, sessionStorage or IndexedDB.</li><li>Raw tokens are excluded from diagnostic reports.</li><li>jku, x5u, jwks_uri, federation endpoints and SAML URLs are displayed only.</li></ul></section>
+        <section class="panel"><h2>XML signature verification</h2><ul class="feature-list"><li><code>xmldsigjs 2.8.8</code> is vendored locally under <code>public/assets/js/external/</code>.</li><li>Package/runtime versions are pinned in <code>package.json</code>; the build records bundled versions in a SHA-384 vendor manifest.</li><li>The local script is loaded with an SRI <code>integrity</code> attribute.</li><li>CI independently recalculates the bundle hash and compares it with both the manifest and HTML SRI value.</li><li>Valid XMLDSig does not imply trusted signing certificate or valid SAML profile.</li></ul></section>
+      </div>
+      <section class="panel"><div class="panel-heading"><div><p class="eyebrow">Roadmap foundation</p><h2>Implemented surfaces</h2></div></div><div class="roadmap-grid"><article><strong>v0.1</strong><span>JWT / JOSE inspection, time/issuer/audience checks, local JWK/JWKS signature verification.</span></article><article><strong>v0.2</strong><span>OIDC ID Token nonce/azp/auth_time/at_hash/c_hash analysis, RFC 9068 JWT access tokens, discovery/JWKS security guidance, scopes/roles/entitlements.</span></article><article><strong>v0.3</strong><span>SAML Response/Assertion, SubjectConfirmation, Conditions/AudienceRestriction, NameID, AuthnContext, attributes, signature coverage and local XMLDSig verification.</span></article><article><strong>v0.4</strong><span>JWT ↔ SAML ↔ WS-Fed semantic claim mapping, custom aliases, migration summaries and downloadable migration reports.</span></article><article><strong>v0.5</strong><span>WS-Federation / WS-Trust envelope, AppliesTo/lifetime analysis and embedded SAML 2.0 or SAML 1.x enterprise assertions.</span></article><article><strong>v0.6</strong><span>OIDC/SAML/JWKS/OpenID Federation inspection, configuration diffing, issuer migration and signing-key/certificate rotation analysis.</span></article></div></section>
+      <div class="notice warning"><strong>Alpha scope:</strong> these are implementation foundations, not claims of complete protocol conformance. See <code>ROADMAP.md</code> and <code>SECURITY.md</code> for hardening work required before stable 1.0.</div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner centered-footer">© 2026 identity-toolkit · <a href="https://github.com/safesploitOrg/identity-toolkit" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div>
+  </footer>
+</body>
+</html>
