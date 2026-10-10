@@ -1,6 +1,6 @@
 {
   "name": "identity-toolkit",
-  "version": "0.6.0-alpha.2",
+  "version": "0.6.0-alpha.3",
   "private": true,
   "description": "Browser-only identity, claims and federation diagnostics for JWT/JOSE, OIDC/OAuth, SAML, WS-Federation and OpenID Federation.",
   "type": "module",
@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@playwright/test": "1.55.1",
-    "@xmldom/xmldom": "0.8.11",
+    "@xmldom/xmldom": "0.9.12",
     "esbuild": "0.25.10",
     "xml-core": "1.2.6",
     "xmldsigjs": "2.8.8",
@@ -37,7 +37,8 @@
     "xml-core": "1.2.6",
     "xpath": "0.0.34",
     "@noble/hashes": "1.8.0",
-    "bytestreamjs": "2.0.1"
+    "bytestreamjs": "2.0.1",
+    "@xmldom/xmldom": "0.9.12"
   },
   "license": "UNLICENSED"
 }

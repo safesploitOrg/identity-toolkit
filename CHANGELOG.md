@@ -4,6 +4,18 @@ All notable changes to Identity Toolkit are documented here.
 
 The project is pre-1.0. Protocol coverage and result schemas may change while the validation model is hardened.
 
+## [0.6.0-alpha.3] - 2026-10-10
+
+### Fixed
+
+- Updated `@xmldom/xmldom` from `0.8.11` to the pinned `0.9.12` release so it satisfies the `xml-core@1.2.6` peer dependency range (`^0.9.10`).
+- Added an `@xmldom/xmldom` override at `0.9.12` so direct and transitive dependency resolution cannot silently select a different DOM implementation version during CI.
+- Kept strict npm dependency resolution; the project does **not** use `--force` or `--legacy-peer-deps` to bypass peer-dependency errors.
+
+### Security
+
+- Uses the current `0.9.12` xmldom release rather than the older `0.8.11` test dependency while preserving the XML parser's DTD/ENTITY rejection and non-iterable NodeList compatibility layer.
+
 ## [0.6.0-alpha.2] - 2026-10-10
 
 ### Fixed

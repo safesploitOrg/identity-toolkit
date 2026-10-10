@@ -2,7 +2,7 @@
 
 Browser-only identity, claims and federation diagnostics for JWT/JOSE, OpenID Connect, OAuth 2.0, SAML 2.0, WS-Federation / WS-Trust and OpenID Federation.
 
-> **Status:** `v0.6.0-alpha.2` — the planned v0.2–v0.6 analysis surfaces are implemented. The project remains pre-1.0 while adversarial corpora, complete profile conformance and trust-chain workflows are hardened.
+> **Status:** `v0.6.0-alpha.3` — the planned v0.2–v0.6 analysis surfaces are implemented. The project remains pre-1.0 while adversarial corpora, complete profile conformance and trust-chain workflows are hardened.
 
 ## Principles
 
