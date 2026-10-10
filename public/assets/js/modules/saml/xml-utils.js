@@ -32,8 +32,16 @@ export function firstDescendant(node, localName) {
 
 export function childElements(node, localName = null) {
   const result = [];
-  for (const child of node.childNodes ?? []) {
-    if (child.nodeType === 1 && (!localName || child.localName === localName || child.nodeName === localName)) result.push(child);
+  const children = node?.childNodes;
+  if (!children) return result;
+
+  // DOM NodeList implementations are array-like but are not universally iterable.
+  // Browsers normally support `for...of`; @xmldom/xmldom intentionally only
+  // guarantees indexed/item() access. Use the DOM-compatible common subset.
+  for (let index = 0; index < children.length; index += 1) {
+    const child = typeof children.item === 'function' ? children.item(index) : children[index];
+    if (!child || child.nodeType !== 1) continue;
+    if (!localName || child.localName === localName || child.nodeName === localName) result.push(child);
   }
   return result;
 }

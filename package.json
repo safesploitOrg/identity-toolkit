@@ -1,6 +1,6 @@
 {
   "name": "identity-toolkit",
-  "version": "0.6.0-alpha.1",
+  "version": "0.6.0-alpha.2",
   "private": true,
   "description": "Browser-only identity, claims and federation diagnostics for JWT/JOSE, OIDC/OAuth, SAML, WS-Federation and OpenID Federation.",
   "type": "module",
@@ -8,7 +8,7 @@
     "vendor:xmldsig": "node scripts/vendor-xmldsig.mjs",
     "verify:vendor": "node scripts/verify-vendor.mjs",
     "test": "node --test tests/unit/*.test.js",
-    "test:core": "node --test tests/unit/detector.test.js tests/unit/jwt.test.js tests/unit/claims.test.js tests/unit/federation.test.js tests/unit/oidc.test.js tests/unit/oauth.test.js tests/unit/openid-federation.test.js",
+    "test:core": "node --test tests/unit/detector.test.js tests/unit/jwt.test.js tests/unit/claims.test.js tests/unit/federation.test.js tests/unit/oidc.test.js tests/unit/oauth.test.js tests/unit/openid-federation.test.js tests/unit/xml-utils.test.js",
     "test:browser": "npm run vendor:xmldsig && playwright test",
     "check:syntax": "find public/assets/js scripts tests/unit tests/browser \\( -name '*.js' -o -name '*.mjs' \\) -type f -print0 | sort -z | xargs -0 -n1 node --check",
     "check:core": "npm run check:syntax && npm run check:static && npm run test:core",
@@ -23,6 +23,7 @@
     "@playwright/test": "1.55.1",
     "@xmldom/xmldom": "0.8.11",
     "esbuild": "0.25.10",
+    "xml-core": "1.2.6",
     "xmldsigjs": "2.8.8",
     "xpath": "0.0.34"
   },

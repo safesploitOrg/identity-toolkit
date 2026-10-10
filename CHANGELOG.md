@@ -4,6 +4,19 @@ All notable changes to Identity Toolkit are documented here.
 
 The project is pre-1.0. Protocol coverage and result schemas may change while the validation model is hardened.
 
+## [0.6.0-alpha.2] - 2026-10-10
+
+### Fixed
+
+- Made SAML/XML child traversal compatible with both browser `NodeList` objects and `@xmldom/xmldom` array-like collections. The parser no longer assumes `childNodes` implements `Symbol.iterator`.
+- Corrected Node XMLDSig test initialisation to import `setNodeDependencies()` from the pinned `xml-core` package rather than calling a non-exported `xmldsigjs.setNodeDependencies()` function.
+- Added `xml-core@1.2.6` as an explicit development dependency because the XMLDSig Node test uses its public Node dependency-registration API directly.
+
+### Tests
+
+- Added a regression test using a deliberately non-iterable DOM-style `NodeList` so the browser/xmldom compatibility boundary is covered by the dependency-light core suite.
+- Core test selection now includes the XML utility regression tests.
+
 ## [0.6.0-alpha.1] - 2026-10-02
 
 ### Added — OIDC / OAuth (`v0.2`)

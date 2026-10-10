@@ -4,9 +4,10 @@ import { webcrypto } from 'node:crypto';
 import { DOMImplementation, DOMParser, XMLSerializer } from '@xmldom/xmldom';
 import xpath from 'xpath';
 import * as xmldsigjs from 'xmldsigjs';
+import { setNodeDependencies } from 'xml-core';
 import { verifySamlXmlSignatures } from '../../public/assets/js/modules/saml/xmldsig-verifier.js';
 
-xmldsigjs.setNodeDependencies({ DOMImplementation, DOMParser, XMLSerializer, xpath });
+setNodeDependencies({ DOMImplementation, DOMParser, XMLSerializer, xpath });
 xmldsigjs.Application.setEngine('NodeJS', webcrypto);
 globalThis.DOMParser = DOMParser;
 globalThis.XMLSerializer = XMLSerializer;

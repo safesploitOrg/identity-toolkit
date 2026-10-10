@@ -26,6 +26,6 @@ export function buildDiagnosticReport(result) {
   if (result.signature) {
     lines.push('', 'Signature', '---------', `valid: ${display(result.signature.valid)}`, `provenance: ${display(result.signature.provenance)}`, `detail: ${display(result.signature.detail)}`);
   }
-  lines.push('', 'Privacy', '-------', 'Raw bearer tokens/assertions are intentionally excluded from this report.', '', 'Identity Toolkit v0.6.0-alpha.1');
+  lines.push('', 'Privacy', '-------', 'Raw bearer tokens/assertions are intentionally excluded from this report.', '', 'Identity Toolkit v0.6.0-alpha.2');
   return lines.join('\n');
 }

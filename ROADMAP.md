@@ -1,6 +1,6 @@
 # Roadmap
 
-Current implementation: **`v0.6.0-alpha.1`**.
+Current implementation: **`v0.6.0-alpha.2`**.
 
 The requested v0.2–v0.6 product surfaces are now implemented. Remaining work below is primarily standards hardening, adversarial testing and deeper trust semantics before stable 1.0.
 
