@@ -52,7 +52,7 @@ jobs:
   #     - run: npx playwright test --project=${{ matrix.browser }}
 
   deploy:
-    needs: [build, browser]
+    # needs: [build, browser]
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
